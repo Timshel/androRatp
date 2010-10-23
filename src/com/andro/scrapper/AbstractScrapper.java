@@ -1,8 +1,9 @@
 package com.andro.scrapper;
 
-import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
+import java.net.UnknownHostException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -41,25 +42,9 @@ public abstract class AbstractScrapper {
 		return null;
 	}
 
-	protected String getHtmlAsString(URL url) {
-		StringBuilder sb = new StringBuilder();
+	public TagNode scrapCleanHtml(URL url){
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					url.openStream()));
-
-			String line = reader.readLine();
-			while (line != null) {
-				sb.append(line);
-				line = reader.readLine();
-			}
-		} catch (Exception e){
-			Logger.error( e );
-		}
-		return sb.toString();
-	}
-
-	public TagNode scrapCleanHtml(URL url) {
-		try {
+			URLConnection conn = url.openConnection();
 			HtmlCleaner cleaner = new HtmlCleaner();
 			CleanerProperties props = cleaner.getProperties();
 			props.setAllowHtmlInsideAttributes(true);
@@ -67,14 +52,27 @@ public abstract class AbstractScrapper {
 			props.setRecognizeUnicodeChars(true);
 			props.setOmitComments(true);
 
-			return cleaner.clean(new InputStreamReader(url.openStream()));
+			return cleaner.clean(
+					new InputStreamReader( conn.getInputStream() ) );
+		}catch( UnknownHostException uhe ){
+			Logger.error("Start the fucking connection : " + uhe);
 		} catch (Exception e) {
 			Logger.error( e );
+			
 		}
 		return null;
 	}
 	
-	protected abstract Horaires fillData( Object[] nodes );
+	protected Horaires fillData(Object[] nodes){
+		Horaires horaires = new Horaires();
+		if( nodes.length > 2 && nodes.length % 2 == 0 ){
+			for( int index = 0; index < nodes.length; index +=2 )
+				horaires.add( ( (TagNode)nodes[index] ).getText().toString(),
+						( (TagNode)nodes[index+1] ).getText().toString() );
+			Logger.debug( horaires.toString() );
+		}
+		return horaires;
+	}
 	
 	public Horaires extractData(TagNode node) {
 		try {
@@ -87,6 +85,7 @@ public abstract class AbstractScrapper {
 	}
 
 	public Horaires getHtml(){
+		Logger.debug("-----------START---------------");
 		URL url = buildUrl();
 		Logger.debug( url.toString() );
 		TagNode node = scrapCleanHtml(url);
