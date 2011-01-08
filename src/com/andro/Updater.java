@@ -15,31 +15,42 @@ public class Updater implements OnClickListener, Cloneable{
 	private final AndroRatp activity;
 	private final TextView text;
 	private final Button button;
+	
 	private final AbstractScrapper scrapper;
+	private final Worker worker;
+	
+	private class Worker implements Runnable{
+		public void run(){
+			Horaires horaires = scrapper.getHtml();
+			activity.getHandler().post( new UIRefresher(horaires) );
+		}
+	}
+	
+	private class UIRefresher implements Runnable{
+		private Horaires horaires;
+		
+		public UIRefresher( Horaires horaires ){
+			this.horaires = horaires;
+		}
+		
+		public void run() {
+			text.setText( horaires.toString() );
+		    button.setEnabled( true );
+		}
+	}
 	
 	public Updater(AndroRatp activity, Button button, TextView text, AbstractScrapper scrapper){
 		this.activity = activity;
 		this.button = button;
 		this.text = text;
 		this.scrapper = scrapper;
+		this.worker = new Worker();
 	}
 	
 	public void onClick(View view){
-		if( isAvailable() ){
-			button.setPressed( true );
-			Thread thread = new Thread(){
-				public void run(){
-					final Horaires html = scrapper.getHtml();
-					activity.getHandler().post(
-							new Runnable() {					
-								public void run() {
-									text.setText( html.toString() );
-								    button.setPressed( false );
-								}
-							} );
-				}
-			};
-			thread.start();
+		if( button.isEnabled() &&  isAvailable() ){
+			button.setEnabled( false );
+			new Thread( this.worker ).start();
 		}
 	}
 	
