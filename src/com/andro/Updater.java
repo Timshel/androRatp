@@ -1,5 +1,6 @@
 package com.andro;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -48,17 +49,15 @@ public class Updater implements OnClickListener, Cloneable{
 	}
 	
 	public void onClick(View view){
-		if( button.isEnabled() &&  isAvailable() ){
-			button.setEnabled( false );
-			new Thread( this.worker ).start();
+		if( button.isEnabled() ){
+			if( isAvailable() ){
+				button.setEnabled( false );
+				new Thread( this.worker ).start();
+			}else{
+				new AlertDialog.Builder( this.activity )
+					.setMessage("Pas de reseau. Try again :D.").show();
+			}
 		}
-	}
-	
-	public void run(){
-		button.setPressed( true );
-		Horaires html = scrapper.getHtml();    
-	    text.setText( html.toString() );
-	    button.setPressed( false );
 	}
 	
 	public boolean isAvailable(){
