@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/defaultLayout" android:orientation="horizontal"
+	android:layout_width="fill_parent" android:layout_height="wrap_content">
+
+	<ImageView android:id="@+id/lineImage" android:layout_marginRight="10px"
+		android:layout_width="wrap_content" android:layout_height="wrap_content" 
+		android:layout_alignParentLeft="true" android:layout_centerVertical="true"  />
+		
+	<Button android:id="@+id/lineButton" android:layout_marginLeft="10px"
+		android:layout_width="wrap_content" android:layout_height="wrap_content"
+		android:layout_alignParentRight="true" android:layout_centerVertical="true"
+		android:background="@drawable/button_refresh" />
+
+	<TextView android:layout_centerVertical="true"
+		android:layout_width="wrap_content" android:layout_height="wrap_content" 
+		android:layout_toRightOf="@id/lineImage" android:layout_toLeftOf="@id/lineButton" />
+		
+</RelativeLayout>
